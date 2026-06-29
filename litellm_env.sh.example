@@ -3,6 +3,10 @@
 # 复制为 litellm_env.sh 并填入你的实际 key:
 #   cp litellm_env.sh.example litellm_env.sh
 
+# PPIO (通过 CC Switch 代理，已有)
+# CC Switch 自己管理 key，这里填个占位即可
+export PPIO_API_KEY="ppio-via-cc-switch"
+
 # DeepSeek (便宜，编码强，推荐优先用)
 # 注册: https://platform.deepseek.com
 export DEEPSEEK_API_KEY="sk-your-deepseek-key"
@@ -11,13 +15,9 @@ export DEEPSEEK_API_KEY="sk-your-deepseek-key"
 # 注册: https://dashscope.console.aliyun.com
 export DASHSCOPE_API_KEY="sk-your-dashscope-key"
 
-# OpenAI
-# 注册: https://platform.openai.com
-export OPENAI_API_KEY="sk-your-openai-key"
-
-# Anthropic
+# Anthropic (直连，可选)
 # 注册: https://console.anthropic.com
 export ANTHROPIC_API_KEY="sk-your-anthropic-key"
 
-# LiteLLM 管理密钥 (用于访问 /admin 面板，随意设置)
+# LiteLLM 管理密钥 (随意设置)
 export LITELLM_MASTER_KEY="sk-litellm-local"

@@ -1,84 +1,75 @@
 # LiteLLM Proxy 配置
-# 用途: 统一模型路由，省钱用便宜模型替代贵模型
-# 文档: https://docs.litellm.ai/docs/simple_proxy
+# 三层省钱策略: 复杂→Anthropic, 日常→GPT-5.5, 琐碎→Ollama本地免费
 
 model_list:
   # ═══════════════════════════════════════════
-  # DeepSeek (便宜，编码强) — 推荐优先用
+  # PPIO — 日常任务 (通过 CC Switch 代理)
   # ═══════════════════════════════════════════
-  - model_name: deepseek-chat
+  - model_name: gpt-5.5
+    litellm_params:
+      model: openai/pa/gpt-5.5
+      api_key: os.environ/PPIO_API_KEY
+      api_base: http://127.0.0.1:15721/v1
+
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/pa/gpt-4o
+      api_key: os.environ/PPIO_API_KEY
+      api_base: http://127.0.0.1:15721/v1
+
+  # ═══════════════════════════════════════════
+  # Ollama — 琐碎任务 (本地免费)
+  # ═══════════════════════════════════════════
+  - model_name: qwen3-coder
+    litellm_params:
+      model: ollama/qwen3-coder:30b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: deepseek-r1
+    litellm_params:
+      model: ollama/deepseek-r1:32b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: devstral
+    litellm_params:
+      model: ollama/devstral-small-2:latest
+      api_base: http://127.0.0.1:11434
+
+  - model_name: qwen3
+    litellm_params:
+      model: ollama/qwen3:32b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: llama3.1
+    litellm_params:
+      model: ollama/llama3.1:8b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: qwen3-14b
+    litellm_params:
+      model: ollama/qwen3:14b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: qwen2.5-7b
+    litellm_params:
+      model: ollama/qwen2.5:7b
+      api_base: http://127.0.0.1:11434
+
+  # ═══════════════════════════════════════════
+  # DeepSeek API — 备选便宜方案 (需 key)
+  # ═══════════════════════════════════════════
+  - model_name: ds-chat
     litellm_params:
       model: deepseek/deepseek-chat
       api_key: os.environ/DEEPSEEK_API_KEY
 
-  - model_name: deepseek-coder
-    litellm_params:
-      model: deepseek/deepseek-coder
-      api_key: os.environ/DEEPSEEK_API_KEY
-
-  - model_name: deepseek-reasoner
+  - model_name: ds-reasoner
     litellm_params:
       model: deepseek/deepseek-reasoner
       api_key: os.environ/DEEPSEEK_API_KEY
 
   # ═══════════════════════════════════════════
-  # Qwen (便宜，中文好)
-  # ═══════════════════════════════════════════
-  - model_name: qwen-max
-    litellm_params:
-      model: dashscope/qwen-max
-      api_key: os.environ/DASHSCOPE_API_KEY
-
-  - model_name: qwen-plus
-    litellm_params:
-      model: dashscope/qwen-plus
-      api_key: os.environ/DASHSCOPE_API_KEY
-
-  - model_name: qwen-turbo
-    litellm_params:
-      model: dashscope/qwen-turbo
-      api_key: os.environ/DASHSCOPE_API_KEY
-
-  - model_name: qwen-coder-plus
-    litellm_params:
-      model: dashscope/qwen-coder-plus-latest
-      api_key: os.environ/DASHSCOPE_API_KEY
-
-  # ═══════════════════════════════════════════
-  # OpenAI
-  # ═══════════════════════════════════════════
-  - model_name: gpt-4o
-    litellm_params:
-      model: openai/gpt-4o
-      api_key: os.environ/OPENAI_API_KEY
-
-  - model_name: gpt-4o-mini
-    litellm_params:
-      model: openai/gpt-4o-mini
-      api_key: os.environ/OPENAI_API_KEY
-
-  - model_name: gpt-4.1
-    litellm_params:
-      model: openai/gpt-4.1
-      api_key: os.environ/OPENAI_API_KEY
-
-  - model_name: gpt-4.1-mini
-    litellm_params:
-      model: openai/gpt-4.1-mini
-      api_key: os.environ/OPENAI_API_KEY
-
-  - model_name: o3
-    litellm_params:
-      model: openai/o3
-      api_key: os.environ/OPENAI_API_KEY
-
-  - model_name: o4-mini
-    litellm_params:
-      model: openai/o4-mini
-      api_key: os.environ/OPENAI_API_KEY
-
-  # ═══════════════════════════════════════════
-  # Anthropic
+  # Anthropic — 复杂编程 (需 key)
   # ═══════════════════════════════════════════
   - model_name: claude-sonnet
     litellm_params:
@@ -90,21 +81,13 @@ model_list:
       model: anthropic/claude-haiku-4-5-20251001
       api_key: os.environ/ANTHROPIC_API_KEY
 
-  - model_name: claude-opus
-    litellm_params:
-      model: anthropic/claude-opus-4-20250514
-      api_key: os.environ/ANTHROPIC_API_KEY
-
 # ═══════════════════════════════════════════
 # 路由策略
 # ═══════════════════════════════════════════
 router_settings:
   routing_strategy: usage-based-routing-v2
   num_retries: 2
-  timeout: 120
-  fallbacks:
-    - claude-sonnet: [gpt-4o, deepseek-chat]
-    - gpt-4o: [claude-sonnet, deepseek-chat]
+  timeout: 180
 
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
