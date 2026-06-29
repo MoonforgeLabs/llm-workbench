@@ -1,24 +1,35 @@
 # LiteLLM Proxy 配置
-# 三层省钱策略: 复杂→Anthropic, 日常→GPT-5.5, 琐碎→Ollama本地免费
+# 实际可用模型清单 (已验证)
 
 model_list:
   # ═══════════════════════════════════════════
-  # PPIO — 日常任务 (通过 CC Switch 代理)
+  # PPIO — 通过 CC Switch (端口 15721)
+  # 已验证可用: ppio/pa/gpt-5.5
   # ═══════════════════════════════════════════
   - model_name: gpt-5.5
     litellm_params:
-      model: openai/pa/gpt-5.5
-      api_key: os.environ/PPIO_API_KEY
-      api_base: http://127.0.0.1:15721/v1
-
-  - model_name: gpt-4o
-    litellm_params:
-      model: openai/pa/gpt-4o
+      model: openai/ppio/pa/gpt-5.5
       api_key: os.environ/PPIO_API_KEY
       api_base: http://127.0.0.1:15721/v1
 
   # ═══════════════════════════════════════════
-  # Ollama — 琐碎任务 (本地免费)
+  # 小米代理 — Mimo 模型 (端口 model.mify.ai.srv)
+  # 已验证可用: xiaomi/mimo-v2.5, xiaomi/mimo-v2.5-pro
+  # ═══════════════════════════════════════════
+  - model_name: mimo
+    litellm_params:
+      model: openai/xiaomi/mimo-v2.5
+      api_key: os.environ/ANTHROPIC_API_KEY
+      api_base: http://model.mify.ai.srv/anthropic/v1
+
+  - model_name: mimo-pro
+    litellm_params:
+      model: openai/xiaomi/mimo-v2.5-pro
+      api_key: os.environ/ANTHROPIC_API_KEY
+      api_base: http://model.mify.ai.srv/anthropic/v1
+
+  # ═══════════════════════════════════════════
+  # Ollama — 本地免费 (端口 11434)
   # ═══════════════════════════════════════════
   - model_name: qwen3-coder
     litellm_params:
@@ -56,7 +67,7 @@ model_list:
       api_base: http://127.0.0.1:11434
 
   # ═══════════════════════════════════════════
-  # DeepSeek API — 备选便宜方案 (需 key)
+  # DeepSeek API — 备选 (需 DEEPSEEK_API_KEY)
   # ═══════════════════════════════════════════
   - model_name: ds-chat
     litellm_params:
@@ -67,19 +78,6 @@ model_list:
     litellm_params:
       model: deepseek/deepseek-reasoner
       api_key: os.environ/DEEPSEEK_API_KEY
-
-  # ═══════════════════════════════════════════
-  # Anthropic — 复杂编程 (需 key)
-  # ═══════════════════════════════════════════
-  - model_name: claude-sonnet
-    litellm_params:
-      model: anthropic/claude-sonnet-4-20250514
-      api_key: os.environ/ANTHROPIC_API_KEY
-
-  - model_name: claude-haiku
-    litellm_params:
-      model: anthropic/claude-haiku-4-5-20251001
-      api_key: os.environ/ANTHROPIC_API_KEY
 
 # ═══════════════════════════════════════════
 # 路由策略
