@@ -11,26 +11,29 @@ claude-hr() {
 }
 
 # ─── 日常任务: Codex + LiteLLM (默认 GPT-5.5) ───
-# 用法: codex-ll [--model 模型名]
+# 用法: codex-ll
 codex-ll() {
   if ! curl -s --max-time 1 http://127.0.0.1:4000/health -H "Authorization: Bearer sk-litellm-local" >/dev/null 2>&1; then
     echo "⚠️  LiteLLM proxy 未运行，先启动: ll-start"
     return 1
   fi
-  OPENAI_BASE_URL="http://127.0.0.1:4000/v1" OPENAI_API_KEY="sk-litellm-local" codex "$@"
+  codex -c 'model_providers.custom.base_url="http://127.0.0.1:4000/v1"' "$@"
 }
 
 # ─── 琐碎任务: Codex + Ollama 本地模型 (免费) ───
 # 用法: codex-free [模型名]
-# 默认用 qwen3-coder，可指定: codex-free devstral / codex-free qwen3
 codex-free() {
-  local model="${1:-qwen3-coder}"
   if ! curl -s --max-time 1 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
     echo "⚠️  Ollama 未运行，先启动: ollama serve"
     return 1
   fi
-  echo "🆓 本地模型: ${model}"
-  OPENAI_BASE_URL="http://127.0.0.1:11434/v1" OPENAI_API_KEY="ollama" codex "--model" "$model"
+  if [[ -n "${1:-}" ]]; then
+    echo "🆓 本地模型: $1"
+    codex --oss --local-provider ollama -c "model=\"$1\"" "$@"
+  else
+    echo "🆓 本地模型: 默认"
+    codex --oss --local-provider ollama "$@"
+  fi
 }
 
 # ═══════════════════════════════════════════
