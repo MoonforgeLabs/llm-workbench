@@ -10,37 +10,27 @@ claude-hr() {
   ANTHROPIC_BASE_URL="http://127.0.0.1:8787" claude "$@"
 }
 
-# ─── 日常任务: Codex + GPT-5.5 (通过 PPIO) ───
-# 用法: codex-ll
+# ─── 日常任务: Codex + LiteLLM (默认 GPT-5.5) ───
+# 用法: codex-ll [--model 模型名]
 codex-ll() {
-  if ! curl -s --max-time 1 http://127.0.0.1:4000/health >/dev/null 2>&1; then
-    echo "⚠️  LiteLLM proxy 未运行，先启动: ~/.start-litellm.sh --daemon"
+  if ! curl -s --max-time 1 http://127.0.0.1:4000/health -H "Authorization: Bearer sk-litellm-local" >/dev/null 2>&1; then
+    echo "⚠️  LiteLLM proxy 未运行，先启动: ll-start"
     return 1
   fi
-  OPENAI_BASE_URL="http://127.0.0.1:4000/v1" codex "$@"
+  OPENAI_BASE_URL="http://127.0.0.1:4000/v1" OPENAI_API_KEY="sk-litellm-local" codex "$@"
 }
 
 # ─── 琐碎任务: Codex + Ollama 本地模型 (免费) ───
 # 用法: codex-free [模型名]
-# 默认用 qwen3-coder:30b，可指定其他本地模型
+# 默认用 qwen3-coder，可指定: codex-free devstral / codex-free qwen3
 codex-free() {
   local model="${1:-qwen3-coder}"
   if ! curl -s --max-time 1 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
     echo "⚠️  Ollama 未运行，先启动: ollama serve"
     return 1
   fi
-  echo "🆓 使用本地模型: ${model}"
+  echo "🆓 本地模型: ${model}"
   OPENAI_BASE_URL="http://127.0.0.1:11434/v1" OPENAI_API_KEY="ollama" codex "--model" "$model"
-}
-
-# ─── Codex + Anthropic (复杂任务，需要 Anthropic key) ───
-# 用法: codex-pro
-codex-pro() {
-  if ! curl -s --max-time 1 http://127.0.0.1:4000/health >/dev/null 2>&1; then
-    echo "⚠️  LiteLLM proxy 未运行，先启动: ~/.start-litellm.sh --daemon"
-    return 1
-  fi
-  OPENAI_BASE_URL="http://127.0.0.1:4000/v1" codex "--model" "claude-sonnet"
 }
 
 # ═══════════════════════════════════════════
@@ -48,8 +38,8 @@ codex-pro() {
 # ═══════════════════════════════════════════
 
 # LiteLLM
-alias ll-status='curl -s http://127.0.0.1:4000/health 2>/dev/null | python3 -m json.tool || echo "LiteLLM 未运行"'
-alias ll-start='~/.start-litellm.sh --daemon'
+alias ll-status='curl -s http://127.0.0.1:4000/health -H "Authorization: Bearer sk-litellm-local" 2>/dev/null | python3 -m json.tool || echo "LiteLLM 未运行"'
+alias ll-start='bash /Users/alex/Documents/myCode/references/knowledge/litellm-workbench/start-litellm.sh --daemon'
 alias ll-stop='kill $(pgrep -f "litellm.*--port 4000") 2>/dev/null && echo "已停止" || echo "未运行"'
 alias ll-logs='tail -50 ~/.litellm.log'
 alias ll-models='curl -s http://127.0.0.1:4000/v1/models -H "Authorization: Bearer sk-litellm-local" 2>/dev/null | python3 -c "import sys,json; [print(m[\"id\"]) for m in json.load(sys.stdin).get(\"data\",[])]"'
