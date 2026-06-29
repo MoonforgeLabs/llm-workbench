@@ -1,5 +1,5 @@
 # LiteLLM Proxy 配置
-# 实际可用模型清单 (已验证)
+# 实际可用模型清单
 
 model_list:
   # ═══════════════════════════════════════════
@@ -11,6 +11,56 @@ model_list:
       model: openai/ppio/pa/gpt-5.5
       api_key: os.environ/PPIO_API_KEY
       api_base: http://127.0.0.1:15721/v1
+
+  # ═══════════════════════════════════════════
+  # Xiaomi MiMo — 原生 LiteLLM 支持 (OpenAI 格式)
+  # 需要 XIAOMI_MIMO_API_KEY
+  # 注册: https://platform.xiaomimimo.com
+  # ═══════════════════════════════════════════
+  - model_name: mimo
+    litellm_params:
+      model: xiaomi_mimo/mimo-v2.5
+      api_key: os.environ/XIAOMI_MIMO_API_KEY
+
+  - model_name: mimo-pro
+    litellm_params:
+      model: xiaomi_mimo/mimo-v2.5-pro
+      api_key: os.environ/XIAOMI_MIMO_API_KEY
+
+  # ═══════════════════════════════════════════
+  # OpenRouter — 一个 key 调 100+ 模型
+  # 需要 OPENROUTER_API_KEY
+  # 注册: https://openrouter.ai
+  # ═══════════════════════════════════════════
+  - model_name: claude-sonnet
+    litellm_params:
+      model: openrouter/anthropic/claude-sonnet-4-20250514
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: claude-opus
+    litellm_params:
+      model: openrouter/anthropic/claude-opus-4-20250514
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: claude-haiku
+    litellm_params:
+      model: openrouter/anthropic/claude-haiku-4-5-20251001
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: gemini-flash
+    litellm_params:
+      model: openrouter/google/gemini-2.0-flash-001
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: gemini-pro
+    litellm_params:
+      model: openrouter/google/gemini-2.5-pro-preview
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: llama4-maverick
+    litellm_params:
+      model: openrouter/meta-llama/llama-4-maverick
+      api_key: os.environ/OPENROUTER_API_KEY
 
   # ═══════════════════════════════════════════
   # Ollama — 本地免费 (端口 11434)
@@ -57,6 +107,11 @@ router_settings:
   routing_strategy: usage-based-routing-v2
   num_retries: 2
   timeout: 180
+  # Fallback: 主模型失败时自动切备用
+  fallbacks:
+    - gpt-5.5: [mimo-pro, claude-sonnet]
+    - mimo-pro: [gpt-5.5, claude-sonnet]
+    - claude-sonnet: [mimo-pro, gpt-5.5]
 
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
@@ -65,6 +120,7 @@ general_settings:
 
 litellm_settings:
   return_response_headers: true
+  drop_params: true
   cache: true
   cache_params:
     type: local
