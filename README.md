@@ -166,6 +166,110 @@ litellm-workbench/
 
 Ollama 默认闲置 5 分钟自动卸载模型，不用担心内存爆。
 
+## Ollama 本地模型的其他使用方式
+
+除了通过 `codex-free` 在 Codex 里用 Ollama，还有几种直接用本地模型写代码的方式：
+
+### 1. aider（推荐，最接近 Claude Code 体验）
+
+```bash
+# 安装
+uv tool install aider-chat
+
+# 用 ornith:35b（coding 专精）
+aider --model ollama/ornith:35b
+
+# 用 qwen3-coder
+aider --model ollama/qwen3-coder
+
+# 用 deepseek-r1（推理/debug）
+aider --model ollama/deepseek-r1
+```
+
+aider 能读代码库、改文件、跑命令，交互模式和 Claude Code 最像。
+
+### 2. Continue（VS Code / JetBrains 插件）
+
+```bash
+# VS Code 里安装 Continue 插件
+# 然后在设置里配置 Ollama 作为 provider
+```
+
+配置示例（`~/.continue/config.yaml`）：
+
+```yaml
+models:
+  - name: ornith:35b
+    provider: ollama
+    model: ornith:35b
+  - name: qwen3-coder
+    provider: ollama
+    model: qwen3-coder
+```
+
+适合在 IDE 里直接补全和对话，不需要切终端。
+
+### 3. OpenHands（自动化/多 agent）
+
+```bash
+npm install -g @openhands/agent-canvas
+agent-canvas
+```
+
+Web UI 操作台，可以配置 Ollama 作为后端。适合跑自动化任务（自动分解 issue、定时代码审查等），个人日常开发用不上。
+
+### 4. claude-code-proxy（用 Claude Code 跑本地模型）
+
+项目地址：https://github.com/1rgs/claude-code-proxy
+
+原理：拦截 Claude Code 的 Anthropic API 请求，通过 LiteLLM 翻译成 OpenAI/Ollama 格式，转发给本地模型。
+
+```
+Claude Code → Anthropic API → claude-code-proxy → LiteLLM → Ollama 本地模型
+```
+
+```bash
+# 克隆
+git clone https://github.com/1rgs/claude-code-proxy.git
+cd claude-code-proxy
+
+# 配置 .env
+cp .env.example .env
+# 编辑 .env：
+#   BIG_MODEL=ollama/ornith:35b
+#   SMALL_MODEL=ollama/ornith:9b
+
+# 启动代理
+uv run uvicorn server:app --host 0.0.0.0 --port 8082
+
+# 用 Claude Code 连接代理（另一个终端）
+ANTHROPIC_BASE_URL=http://localhost:8082 claude
+```
+
+**注意：** Claude Code 的工具调用协议是为 Claude 优化的，本地小模型可能理解不了工具调用格式，导致频繁出错。建议先用 `ornith:35b` 试试，9B 模型基本跑不通。
+
+**优势：** 保留 Claude Code 的完整 UI 和工作流，只是后端换成本地模型。
+**劣势：** 工具调用兼容性不稳定，取决于模型能力。
+
+### 对比
+
+| 工具 | 形态 | 适合场景 | 安装复杂度 | 兼容性 |
+|------|------|----------|-----------|--------|
+| `codex-free` | Shell 函数 | 琐碎任务，快速小改 | 已有 | ✅ Codex 格式 |
+| `aider` | CLI | 日常 coding，替代 Claude Code | 简单 | ✅ 原生支持 Ollama |
+| `Continue` | IDE 插件 | IDE 内补全/对话 | 简单 | ✅ 原生支持 Ollama |
+| `claude-code-proxy` | 代理 | 用 Claude Code UI 跑本地模型 | 中等 | ⚠️ 工具调用可能不稳定 |
+| `OpenHands` | Web UI | 自动化、多 agent | 较复杂 | ✅ 支持 Ollama |
+
+### 推荐 ornith 模型（coding 专精）
+
+```bash
+ollama pull ornith:9b     # 轻量，快速
+ollama pull ornith:35b    # 更强，推荐 48GB RAM
+```
+
+ornith 是专门为 coding agent 训练的开源模型，同体量下 coding 能力最强。
+
 ## 故障排除
 
 ```bash
