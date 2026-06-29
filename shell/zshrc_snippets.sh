@@ -23,17 +23,13 @@ codex-ll() {
 # ─── 琐碎任务: Codex + Ollama 本地模型 (免费) ───
 # 用法: codex-free [模型名]
 codex-free() {
+  local model="${1:-qwen3-coder}"
   if ! curl -s --max-time 1 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
     echo "⚠️  Ollama 未运行，先启动: ollama serve"
     return 1
   fi
-  if [[ -n "${1:-}" ]]; then
-    echo "🆓 本地模型: $1"
-    codex --oss --local-provider ollama -c "model=\"$1\"" "$@"
-  else
-    echo "🆓 本地模型: 默认"
-    codex --oss --local-provider ollama "$@"
-  fi
+  echo "🆓 本地模型: ${model}"
+  codex --oss --local-provider ollama -c "model=\"${model}\"" "$@"
 }
 
 # ═══════════════════════════════════════════
