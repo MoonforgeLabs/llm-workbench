@@ -1,0 +1,119 @@
+# LiteLLM Proxy 配置
+# 用途: 统一模型路由，省钱用便宜模型替代贵模型
+# 文档: https://docs.litellm.ai/docs/simple_proxy
+
+model_list:
+  # ═══════════════════════════════════════════
+  # DeepSeek (便宜，编码强) — 推荐优先用
+  # ═══════════════════════════════════════════
+  - model_name: deepseek-chat
+    litellm_params:
+      model: deepseek/deepseek-chat
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  - model_name: deepseek-coder
+    litellm_params:
+      model: deepseek/deepseek-coder
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  - model_name: deepseek-reasoner
+    litellm_params:
+      model: deepseek/deepseek-reasoner
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  # ═══════════════════════════════════════════
+  # Qwen (便宜，中文好)
+  # ═══════════════════════════════════════════
+  - model_name: qwen-max
+    litellm_params:
+      model: dashscope/qwen-max
+      api_key: os.environ/DASHSCOPE_API_KEY
+
+  - model_name: qwen-plus
+    litellm_params:
+      model: dashscope/qwen-plus
+      api_key: os.environ/DASHSCOPE_API_KEY
+
+  - model_name: qwen-turbo
+    litellm_params:
+      model: dashscope/qwen-turbo
+      api_key: os.environ/DASHSCOPE_API_KEY
+
+  - model_name: qwen-coder-plus
+    litellm_params:
+      model: dashscope/qwen-coder-plus-latest
+      api_key: os.environ/DASHSCOPE_API_KEY
+
+  # ═══════════════════════════════════════════
+  # OpenAI
+  # ═══════════════════════════════════════════
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: gpt-4o-mini
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: gpt-4.1
+    litellm_params:
+      model: openai/gpt-4.1
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: gpt-4.1-mini
+    litellm_params:
+      model: openai/gpt-4.1-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: o3
+    litellm_params:
+      model: openai/o3
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: o4-mini
+    litellm_params:
+      model: openai/o4-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+  # ═══════════════════════════════════════════
+  # Anthropic
+  # ═══════════════════════════════════════════
+  - model_name: claude-sonnet
+    litellm_params:
+      model: anthropic/claude-sonnet-4-20250514
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: claude-haiku
+    litellm_params:
+      model: anthropic/claude-haiku-4-5-20251001
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: claude-opus
+    litellm_params:
+      model: anthropic/claude-opus-4-20250514
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+# ═══════════════════════════════════════════
+# 路由策略
+# ═══════════════════════════════════════════
+router_settings:
+  routing_strategy: usage-based-routing-v2
+  num_retries: 2
+  timeout: 120
+  fallbacks:
+    - claude-sonnet: [gpt-4o, deepseek-chat]
+    - gpt-4o: [claude-sonnet, deepseek-chat]
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  port: 4000
+  host: 127.0.0.1
+
+litellm_settings:
+  return_response_headers: true
+  cache: true
+  cache_params:
+    type: local
+    ttl: 300

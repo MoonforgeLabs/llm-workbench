@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# LiteLLM 环境变量配置
+# 复制为 litellm_env.sh 并填入你的实际 key:
+#   cp litellm_env.sh.example litellm_env.sh
+
+# DeepSeek (便宜，编码强，推荐优先用)
+# 注册: https://platform.deepseek.com
+export DEEPSEEK_API_KEY="sk-your-deepseek-key"
+
+# DashScope (阿里云 Qwen，便宜，中文好)
+# 注册: https://dashscope.console.aliyun.com
+export DASHSCOPE_API_KEY="sk-your-dashscope-key"
+
+# OpenAI
+# 注册: https://platform.openai.com
+export OPENAI_API_KEY="sk-your-openai-key"
+
+# Anthropic
+# 注册: https://console.anthropic.com
+export ANTHROPIC_API_KEY="sk-your-anthropic-key"
+
+# LiteLLM 管理密钥 (用于访问 /admin 面板，随意设置)
+export LITELLM_MASTER_KEY="sk-litellm-local"

@@ -1,0 +1,9 @@
+# API keys (never commit)
+litellm_env.sh
+
+# LiteLLM runtime
+*.log
+litellm.db
+
+# macOS
+.DS_Store
