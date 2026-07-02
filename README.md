@@ -495,7 +495,7 @@ ll-restart
 
 **配置文件位置**：
 ```
-/Users/alex/Documents/myCode/references/knowledge/llm-workbench/litellm_config.yaml
+./litellm_config.yaml
 ```
 
 ## Headroom Token 压缩集成
