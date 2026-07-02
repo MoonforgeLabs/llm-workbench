@@ -22,30 +22,30 @@ model_list:
       api_key: os.environ/PPIO_API_KEY
       api_base: http://127.0.0.1:15721/v1
 
-  # OpenRouter 付费
-  - model_name: claude-sonnet
+  # OpenRouter 付费 (使用 ~latest 别名，自动跟踪最新版本)
+  - model_name: claude-sonnet     # 通用编码、日常重度任务
     litellm_params:
-      model: openrouter/anthropic/claude-sonnet-4.5
+      model: openrouter/~anthropic/claude-sonnet-latest
       api_key: os.environ/OPENROUTER_API_KEY
 
-  - model_name: claude-opus
+  - model_name: claude-opus       # 最强推理、复杂架构设计
     litellm_params:
-      model: openrouter/anthropic/claude-opus-4.5
+      model: openrouter/~anthropic/claude-opus-latest
       api_key: os.environ/OPENROUTER_API_KEY
 
-  - model_name: claude-haiku
+  - model_name: claude-haiku      # 轻量快速、简单问答
     litellm_params:
-      model: openrouter/anthropic/claude-haiku-4.5
+      model: openrouter/~anthropic/claude-haiku-latest
       api_key: os.environ/OPENROUTER_API_KEY
 
-  - model_name: gemini-flash
+  - model_name: gemini-flash      # 快速响应、多模态
     litellm_params:
-      model: openrouter/google/gemini-3.5-flash
+      model: openrouter/~google/gemini-flash-latest
       api_key: os.environ/OPENROUTER_API_KEY
 
-  - model_name: gemini-pro
+  - model_name: gemini-pro        # Google 强推理、长上下文
     litellm_params:
-      model: openrouter/google/gemini-2.5-pro-preview
+      model: openrouter/~google/gemini-pro-latest
       api_key: os.environ/OPENROUTER_API_KEY
 
   # llama4-maverick 已移除 — 本地 gemma4:26b 同级别且免费
