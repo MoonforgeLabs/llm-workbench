@@ -25,23 +25,22 @@ model_list:
   # OpenRouter 付费
   - model_name: claude-sonnet
     litellm_params:
-      model: openrouter/anthropic/claude-sonnet-4-20250514
+      model: openrouter/anthropic/claude-sonnet-4.5
       api_key: os.environ/OPENROUTER_API_KEY
 
-  # Claude Opus — 通过 OpenRouter (CC Switch 的 codex provider 不支持 claude 模型)
   - model_name: claude-opus
     litellm_params:
-      model: openrouter/anthropic/claude-opus-4-20250514
+      model: openrouter/anthropic/claude-opus-4.5
       api_key: os.environ/OPENROUTER_API_KEY
 
   - model_name: claude-haiku
     litellm_params:
-      model: openrouter/anthropic/claude-haiku-4-5-20251001
+      model: openrouter/anthropic/claude-haiku-4.5
       api_key: os.environ/OPENROUTER_API_KEY
 
   - model_name: gemini-flash
     litellm_params:
-      model: openrouter/google/gemini-2.0-flash-001
+      model: openrouter/google/gemini-3.5-flash
       api_key: os.environ/OPENROUTER_API_KEY
 
   - model_name: gemini-pro
@@ -49,10 +48,7 @@ model_list:
       model: openrouter/google/gemini-2.5-pro-preview
       api_key: os.environ/OPENROUTER_API_KEY
 
-  - model_name: llama4-maverick
-    litellm_params:
-      model: openrouter/meta-llama/llama-4-maverick
-      api_key: os.environ/OPENROUTER_API_KEY
+  # llama4-maverick 已移除 — 本地 gemma4:26b 同级别且免费
 
   # ═══════════════════════════════════════════
   # 第二层: 国内免费 API (大陆直连，无需翻墙)
