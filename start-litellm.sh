@@ -25,11 +25,11 @@ else
   exit 1
 fi
 
-# LITELLM_MASTER_KEY 用于 UI 登录和 API 认证。
-# 无数据库时，LiteLLM 仍支持 master key 认证（不依赖 DB）。
-# 如果需要禁用所有认证（纯本地开发），设置 LITELLM_ENABLE_AUTH=0 并 unset。
-if [[ "${LITELLM_ENABLE_AUTH:-0}" == "0" ]]; then
-  : # 保留 master key 供 UI 使用
+# 无数据库模式：必须 unset LITELLM_MASTER_KEY，否则 LiteLLM 报 "No connected db"
+# UI 可用于查看模型和测试，但不支持登录/key 管理。
+# 如需 UI 登录功能，需先配置 database_url 并安装 Prisma。
+if [[ "${LITELLM_ENABLE_AUTH:-0}" != "1" ]]; then
+  unset LITELLM_MASTER_KEY
 fi
 
 if [[ "${1:-}" == "--daemon" ]]; then

@@ -291,10 +291,9 @@ router_settings:
     - llama3.3-70b-free: [qwen3-coder-free, nemotron-ultra-free, ornith-35b]
 
 general_settings:
-  # 本地 127.0.0.1 代理不启用 master_key。
-  # LiteLLM 的 /v1/responses 在无数据库时遇到 master_key auth 会报 No connected db，
-  # Codex 0.142.x 的 custom provider 又只能走 responses wire_api。
-  # 如需对外暴露代理，再配置数据库和 master_key。
+  # 本地 127.0.0.1 代理 — 无数据库模式
+  # UI 可用于查看模型和测试，但不支持登录/key 管理
+  # 如需完整 UI 功能，配置 database_url 并安装 Prisma
   # master_key: os.environ/LITELLM_MASTER_KEY
   port: 4000
   host: 127.0.0.1

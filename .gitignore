@@ -10,6 +10,7 @@ litellm.db
 
 # Database files
 *.db
+litellm_proxy.db
 
 # Logs directory
 logs/
