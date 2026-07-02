@@ -4,9 +4,9 @@
 # ═══════════════════════════════════════════
 
 _codex_litellm_args() {
-  local catalog="/Users/alex/Documents/myCode/references/knowledge/litellm-workbench/codex_litellm_models.json"
+  local catalog="/Users/alex/Documents/myCode/references/knowledge/llm-workbench/codex_litellm_models.json"
   if [[ ! -f "${catalog}" ]]; then
-    python3 /Users/alex/Documents/myCode/references/knowledge/litellm-workbench/scripts/build-codex-litellm-model-catalog.py >/dev/null || return 1
+    python3 /Users/alex/Documents/myCode/references/knowledge/llm-workbench/scripts/build-codex-litellm-model-catalog.py >/dev/null || return 1
   fi
   printf '%s\n' \
     '-c' 'model_provider="litellm"' \
@@ -54,13 +54,13 @@ codex-free() {
 # 用法: codex-local [模型名]
 codex-local() {
   local model="${1:-devstral}"
-  local catalog="/Users/alex/Documents/myCode/references/knowledge/litellm-workbench/codex_oss_models.json"
+  local catalog="/Users/alex/Documents/myCode/references/knowledge/llm-workbench/codex_oss_models.json"
   if ! curl -s --max-time 1 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
     echo "⚠️  Ollama 未运行，先启动: ollama serve"
     return 1
   fi
   if [[ ! -f "${catalog}" ]]; then
-    python3 /Users/alex/Documents/myCode/references/knowledge/litellm-workbench/scripts/build-codex-oss-model-catalog.py >/dev/null || return 1
+    python3 /Users/alex/Documents/myCode/references/knowledge/llm-workbench/scripts/build-codex-oss-model-catalog.py >/dev/null || return 1
   fi
   echo "🆓 本地模型: ${model}"
   codex --oss --local-provider ollama -c "model_catalog_json=\"${catalog}\"" -m "${model}" "$@"
@@ -139,7 +139,7 @@ ll-status() {
 }
 
 ll-start() {
-  bash /Users/alex/Documents/myCode/references/knowledge/litellm-workbench/start-litellm.sh --daemon
+  bash /Users/alex/Documents/myCode/references/knowledge/llm-workbench/start-litellm.sh --daemon
 }
 
 ll-stop() {
@@ -162,7 +162,7 @@ ll-models() {
 }
 
 ll-dashboard() {
-  open /Users/alex/Documents/myCode/references/knowledge/litellm-workbench/dashboard.html
+  open /Users/alex/Documents/myCode/references/knowledge/llm-workbench/dashboard.html
 }
 
 ll-dashboard-server() {
@@ -170,7 +170,7 @@ ll-dashboard-server() {
   echo "🚀 启动管理看板 HTTP 服务器..."
   echo "📊 访问地址: http://localhost:${port}"
   echo "按 Ctrl+C 停止"
-  bash /Users/alex/Documents/myCode/references/knowledge/litellm-workbench/start-dashboard.sh "$port"
+  bash /Users/alex/Documents/myCode/references/knowledge/llm-workbench/start-dashboard.sh "$port"
 }
 
 # Headroom

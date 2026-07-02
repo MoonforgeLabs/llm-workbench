@@ -1,0 +1,250 @@
+# LiteLLM Proxy 配置
+# 四层模型: 付费云端 → 国内免费 → 海外免费(OpenRouter) → 本地Ollama
+
+model_list:
+  # ═══════════════════════════════════════════
+  # 默认免费入口: 国内免费 → 海外免费 → 本地 Ollama
+  # ═══════════════════════════════════════════
+  - model_name: free-auto
+    litellm_params:
+      model: openai/Qwen/Qwen2.5-72B-Instruct
+      api_key: os.environ/SILICONFLOW_API_KEY
+      api_base: https://api.siliconflow.cn/v1
+
+  # ═══════════════════════════════════════════
+  # 第一层: 付费模型
+  # ═══════════════════════════════════════════
+
+  # PPIO — 通过 CC Switch (端口 15721)
+  - model_name: gpt-5.5
+    litellm_params:
+      model: openai/ppio/pa/gpt-5.5
+      api_key: os.environ/PPIO_API_KEY
+      api_base: http://127.0.0.1:15721/v1
+
+  # OpenRouter 付费
+  - model_name: claude-sonnet
+    litellm_params:
+      model: openrouter/anthropic/claude-sonnet-4-20250514
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: claude-opus
+    litellm_params:
+      model: openrouter/anthropic/claude-opus-4-20250514
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: claude-haiku
+    litellm_params:
+      model: openrouter/anthropic/claude-haiku-4-5-20251001
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: gemini-flash
+    litellm_params:
+      model: openrouter/google/gemini-2.0-flash-001
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: gemini-pro
+    litellm_params:
+      model: openrouter/google/gemini-2.5-pro-preview
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: llama4-maverick
+    litellm_params:
+      model: openrouter/meta-llama/llama-4-maverick
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # ═══════════════════════════════════════════
+  # 第二层: 国内免费 API (大陆直连，无需翻墙)
+  # ═══════════════════════════════════════════
+
+  # SiliconFlow 硅基流动 — 免费模型会轮换，以下为当前可用
+  # 注册: https://cloud.siliconflow.cn → 送余额
+  - model_name: sf-deepseek-r1
+    litellm_params:
+      model: openai/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B
+      api_key: os.environ/SILICONFLOW_API_KEY
+      api_base: https://api.siliconflow.cn/v1
+
+  - model_name: sf-qwen2.5-72b
+    litellm_params:
+      model: openai/Qwen/Qwen2.5-72B-Instruct
+      api_key: os.environ/SILICONFLOW_API_KEY
+      api_base: https://api.siliconflow.cn/v1
+
+  # Zhipu 智谱 — GLM-4-Flash 永久免费
+  # 注册: https://open.bigmodel.cn → 送 20M tokens (永久)
+  - model_name: glm-4-flash
+    litellm_params:
+      model: openai/glm-4-flash
+      api_key: os.environ/ZHIPU_API_KEY
+      api_base: https://open.bigmodel.cn/api/paas/v4
+
+  - model_name: glm-4.7-flash
+    litellm_params:
+      model: openai/glm-4.7-flash
+      api_key: os.environ/ZHIPU_API_KEY
+      api_base: https://open.bigmodel.cn/api/paas/v4
+
+  # ═══════════════════════════════════════════
+  # 第三层: 海外免费 (OpenRouter :free)
+  # 使用已有的 OPENROUTER_API_KEY，限流 20 RPM / 200 RPD
+  # ═══════════════════════════════════════════
+  - model_name: qwen3-coder-free
+    litellm_params:
+      model: openrouter/qwen/qwen3-coder:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: nemotron-ultra-free
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: gpt-oss-120b-free
+    litellm_params:
+      model: openrouter/openai/gpt-oss-120b:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: gemma4-free
+    litellm_params:
+      model: openrouter/google/gemma-4-31b-it:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: llama3.3-70b-free
+    litellm_params:
+      model: openrouter/meta-llama/llama-3.3-70b-instruct:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # ═══════════════════════════════════════════
+  # 第四层: Ollama 本地免费 (端口 11434)
+  # ═══════════════════════════════════════════
+  - model_name: ornith-35b
+    litellm_params:
+      model: ollama/ornith:35b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: qwen3-coder
+    litellm_params:
+      model: ollama/qwen3-coder:30b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: deepseek-r1
+    litellm_params:
+      model: ollama/deepseek-r1:32b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: qwen3
+    litellm_params:
+      model: ollama/qwen3:32b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: qwen3.6
+    litellm_params:
+      model: ollama/qwen3.6:27b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: gemma4
+    litellm_params:
+      model: ollama/gemma4:26b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: devstral
+    litellm_params:
+      model: ollama/devstral-small-2:latest
+      api_base: http://127.0.0.1:11434
+
+  - model_name: devstral-large
+    litellm_params:
+      model: ollama/devstral:latest
+      api_base: http://127.0.0.1:11434
+
+  - model_name: qwen3-14b
+    litellm_params:
+      model: ollama/qwen3:14b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: deepseek-r1-14b
+    litellm_params:
+      model: ollama/deepseek-r1:14b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: qwen2.5-14b
+    litellm_params:
+      model: ollama/qwen2.5:14b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: gemma3-12b
+    litellm_params:
+      model: ollama/gemma3:12b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: ornith-9b
+    litellm_params:
+      model: ollama/ornith:9b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: llama3.1
+    litellm_params:
+      model: ollama/llama3.1:8b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: deepseek-r1-7b
+    litellm_params:
+      model: ollama/deepseek-r1:7b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: qwen2.5-7b
+    litellm_params:
+      model: ollama/qwen2.5:7b
+      api_base: http://127.0.0.1:11434
+
+  - model_name: phi3-14b
+    litellm_params:
+      model: ollama/phi3:14b
+      api_base: http://127.0.0.1:11434
+
+# ═══════════════════════════════════════════
+# 路由策略 — 逐层降级
+# ═══════════════════════════════════════════
+router_settings:
+  routing_strategy: usage-based-routing-v2
+  num_retries: 3
+  timeout: 180
+  retry_after: 5
+  context_window_fallbacks:
+    - claude-sonnet: [claude-haiku, sf-qwen2.5-72b]
+    - gpt-5.5: [claude-sonnet, sf-qwen2.5-72b]
+    - gemini-pro: [gemini-flash, sf-qwen2.5-72b]
+  fallbacks:
+    # 默认免费入口: 国内免费 → 海外免费 → 本地
+    - free-auto: [sf-deepseek-r1, glm-4-flash, glm-4.7-flash, qwen3-coder-free, nemotron-ultra-free, gpt-oss-120b-free, qwen3-coder, ornith-35b]
+    # 付费 → 国内免费 → 海外免费 → 本地
+    - gpt-5.5: [claude-sonnet, sf-qwen2.5-72b, qwen3-coder-free, ornith-35b]
+    - claude-sonnet: [gpt-5.5, sf-qwen2.5-72b, nemotron-ultra-free, ornith-35b]
+    # 国内免费互备 → 海外 → 本地
+    - sf-deepseek-r1: [sf-qwen2.5-72b, glm-4-flash, qwen3-coder-free, deepseek-r1]
+    - sf-qwen2.5-72b: [sf-deepseek-r1, glm-4-flash, qwen3-coder-free, qwen3-coder]
+    - glm-4-flash: [glm-4.7-flash, sf-qwen2.5-72b, qwen3-coder-free, qwen3-coder]
+    - glm-4.7-flash: [glm-4-flash, sf-deepseek-r1, qwen3-coder-free, qwen3-coder]
+    # 海外免费互备 → 本地
+    - qwen3-coder-free: [nemotron-ultra-free, gpt-oss-120b-free, ornith-35b]
+    - nemotron-ultra-free: [qwen3-coder-free, gpt-oss-120b-free, ornith-35b]
+    - gpt-oss-120b-free: [qwen3-coder-free, nemotron-ultra-free, ornith-35b]
+    - gemma4-free: [qwen3-coder-free, nemotron-ultra-free, ornith-35b]
+    - llama3.3-70b-free: [qwen3-coder-free, nemotron-ultra-free, ornith-35b]
+
+general_settings:
+  # 本地 127.0.0.1 代理不启用 master_key。
+  # LiteLLM 的 /v1/responses 在无数据库时遇到 master_key auth 会报 No connected db，
+  # Codex 0.142.x 的 custom provider 又只能走 responses wire_api。
+  # 如需对外暴露代理，再配置数据库和 master_key。
+  # master_key: os.environ/LITELLM_MASTER_KEY
+  port: 4000
+  host: 127.0.0.1
+
+litellm_settings:
+  return_response_headers: true
+  drop_params: true
+  cache: true
+  cache_params:
+    type: local
+    ttl: 300
