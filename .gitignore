@@ -5,5 +5,18 @@ litellm_env.sh
 *.log
 litellm.db
 
+# Backup files
+*.bak
+
+# Database files
+*.db
+
+# Logs directory
+logs/
+
+# Generated catalogs (rebuild with scripts)
+codex_litellm_models.json
+codex_oss_models.json
+
 # macOS
 .DS_Store
