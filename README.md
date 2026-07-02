@@ -1,30 +1,31 @@
-# LiteLLM Workbench
+# LLM Workbench
 
-AI Agent 四层省钱工具集。按任务复杂度选模型，最大化免费使用。
+AI Agent 省钱工具集。借鉴 moonforge 任务分类 + llm-workbench 云端能力。
+策略: **简单任务本地优先，复杂任务云端优先**。
 
 ## 架构
 
 ```
 ┌─ 任意终端 (Ghostty / iTerm2 / ...) ──────────────────────────────────────────┐
 │                                                                                │
-│  codex-smart  ──→  Headroom     ──→  LiteLLM      ──→  智能模式(压缩+路由)   │
-│  codex-free   ──→  LiteLLM      ──→  国内免费→海外免费→Ollama 日常默认        │
-│  codex-ff     ──→  LiteLLM      ──→  指定免费云端模型          手动免费        │
-│  codex-local  ──→  Ollama       ──→  本地模型(20个)            强制离线        │
-│  codex-ll     ──→  LiteLLM      ──→  GPT-5.5/Claude/Gemini    付费强模型      │
-│  claude-hr    ──→  Headroom     ──→  Anthropic                复杂编程/重构    │
+│  codex-auto   ──→  LiteLLM      ──→  按任务自动选择模型    借鉴 moonforge     │
+│  codex-coding ──→  LiteLLM      ──→  devstral→qwen3-coder→claude  编码        │
+│  codex-chinese──→  LiteLLM      ──→  qwen3→sf-qwen2.5→claude    中文         │
+│  codex-fast   ──→  LiteLLM      ──→  deepseek-r1-14b→sf→glm     快速         │
+│  codex-smart  ──→  Headroom     ──→  LiteLLM      ──→  压缩+路由             │
+│  codex-free   ──→  LiteLLM      ──→  海外免费→国内免费→本地    兼容旧命令     │
+│  codex-ll     ──→  LiteLLM      ──→  GPT-5.5/Claude/Gemini      付费强模型   │
 │                                                                                │
-│  默认自动降级: 国内免费 → 海外免费 → 本地 Ollama；付费需显式调用              │
+│  策略: 简单任务本地优先，复杂任务云端优先                                      │
 └────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-四层策略:
+核心策略 (借鉴 moonforge):
 
-- **默认入口 免费自动**: `codex-free` → `free-auto`，国内免费 → 海外免费 → 本地 Ollama
-- **第二层 国内免费**: SiliconFlow (2 个当前可用，会轮换) + 智谱 GLM-4-Flash — 大陆直连，速度快
-- **第三层 海外免费**: OpenRouter `:free` (5 个模型) — 需科学上网或已配置好的网络
-- **第四层 本地免费**: Ollama (20 个模型) — 离线可用，无任何限制
-- **付费强模型**: `codex-ll` / `claude-hr` 显式调用，复杂任务才用
+- **任务路由**: `codex-auto --task coding` 按任务自动选择最优模型
+- **本地优先**: 简单任务 (coding/general/chinese/english/fast) 本地 Ollama 优先
+- **云端兜底**: 本地失败 → 国内免费 → 海外免费 → 付费模型
+- **兼容旧命令**: `codex-free`、`codex-ll` 等保持不变
 
 ## 快速开始
 
@@ -52,42 +53,55 @@ curl -s http://127.0.0.1:4000/health | python3 -m json.tool
 
 ## 每日推荐命令
 
-日常默认先薅免费额度，搞不定再手动切付费:
+借鉴 moonforge 任务分类，按任务选择模型:
 
 ```bash
-# 🥇 日常默认 — 国内免费 → 海外免费 → 本地 Ollama 自动降级
+# 🎯 任务路由 — 按任务自动选择最优模型 (推荐)
+codex-auto --task coding    # 编码: devstral → qwen3-coder → claude-sonnet
+codex-auto --task chinese   # 中文: qwen3 → sf-qwen2.5-72b → claude-sonnet
+codex-auto --task general   # 通用: gemma4 → nemotron → claude-sonnet
+codex-auto --task english   # 英文: ornith-35b → nemotron → claude-opus
+codex-auto --task fast      # 快速: deepseek-r1-14b → sf-deepseek-r1
+
+# 🎯 快捷命令
+codex-coding                # 等同于 codex-auto --task coding
+codex-chinese               # 等同于 codex-auto --task chinese
+codex-fast                  # 等同于 codex-auto --task fast
+
+# 🆓 免费自动 — 海外免费 → 国内免费 → 本地 (兼容旧命令)
 codex-free
 
-# 🥈 手动指定国内免费
-codex-ff sf-qwen2.5-72b
-
-# 🥉 手动指定海外免费
-codex-ff nemotron-ultra-free
-
-# 🏠 强制本地 — 离线/无网络时用
-codex-local ornith:35b
-
-# 💸 付费最强 — 重度编码/重构再用
-codex-ll --model claude-sonnet
+# 💸 付费最强 — 复杂任务才用
+codex-ll --model claude-opus
 ```
 
-**日常就用 `codex-free`**，默认从国内免费开始，失败后自动降级到海外免费，最后兜底 Ollama。需要强制本地时用 `codex-local`，复杂任务再切 `codex-ll --model claude-sonnet`。
+**日常推荐 `codex-auto --task coding`**，本地 devstral 优先，失败自动降级到云端免费，最后兜底付费。
 
 ## 命令速查
+
+### 🎯 任务路由 (借鉴 moonforge)
+
+| 命令 | 场景 | 本地模型 | 云端降级 | 费用 |
+|------|------|----------|----------|------|
+| `codex-auto --task coding` | 编码 | devstral | qwen3-coder → claude-sonnet | 免费 |
+| `codex-auto --task general` | 通用 | gemma4 | nemotron → claude-sonnet | 免费 |
+| `codex-auto --task chinese` | 中文 | qwen3 | sf-qwen2.5-72b → claude-sonnet | 免费 |
+| `codex-auto --task english` | 英文 | ornith-35b | nemotron → claude-opus | 免费 |
+| `codex-auto --task fast` | 快速 | deepseek-r1-14b | sf-deepseek-r1 → glm-4-flash | 免费 |
+| `codex-coding` | 编码快捷命令 | devstral | 同上 | 免费 |
+| `codex-chinese` | 中文快捷命令 | qwen3 | 同上 | 免费 |
+| `codex-fast` | 快速快捷命令 | deepseek-r1-14b | 同上 | 免费 |
+
+### 🧠 其他命令
 
 | 命令 | 场景 | 模型层 | 费用 |
 |------|------|--------|------|
 | `codex-smart` | 🧠 智能模式 (Headroom 压缩 + LiteLLM 路由) | 自动选择 | 最优 |
 | `claude-hr` | 复杂编程、代码重构 | 第一层 (Anthropic + Headroom) | 最高 |
 | `codex-ll` | 付费强模型任务 | 第一层 (默认 GPT-5.5) | 中等 |
-| `codex-ll --model claude-sonnet` | 复杂任务 (Claude) | 第一层 (Claude Sonnet) | 中等 |
-| `codex-free` | 日常默认，免费自动降级 | 第二/三/四层 (`free-auto`) | 免费 |
-| `codex-ff` | 手动指定免费云端 | 第二/三层 (默认 qwen3-coder-free) | 免费 |
-| `codex-ff sf-qwen2.5-72b` | 国内免费大模型 | 第二层 (SiliconFlow 72B) | 免费 |
-| `codex-ff glm-4-flash` | 国内免费 (智谱) | 第二层 (GLM-4-Flash) | 免费 |
-| `codex-local` | 强制本地、离线兜底 | 第四层 (Ollama qwen3-coder) | 免费 |
-| `codex-local ornith:35b` | 本地最强编码 | 第四层 (Ollama ornith:35b) | 免费 |
-| `codex-local deepseek-r1` | 推理/debug | 第四层 (Ollama deepseek-r1:32b) | 免费 |
+| `codex-ll --model claude-opus` | 最强推理 | 第一层 (Claude Opus) | 最高 |
+| `codex-free` | 免费自动降级 | 海外免费 → 国内免费 → 本地 | 免费 |
+| `codex-local` | 强制本地、离线兜底 | 第四层 (Ollama) | 免费 |
 | `codex-sticky` | 🔒 粘性会话 (保持同一模型) | 指定模型 | 按模型 |
 
 > `codex-local` 会自动给 Codex 传入 `codex_oss_models.json`，为常用 Ollama 模型补齐 metadata。
@@ -329,24 +343,37 @@ ANTHROPIC_BASE_URL=http://localhost:8082 claude
 
 ## Shell Helper 完整列表
 
+### 🎯 任务路由 (借鉴 moonforge)
+
 | 命令 | 作用 |
 |------|------|
-| `codex-smart [model]` | 🧠 智能模式: Headroom 压缩 + LiteLLM 路由 + 自动降级 |
+| `codex-auto [--task TYPE]` | 🎯 按任务自动选择模型 (coding/general/chinese/english/fast) |
+| `codex-coding` | 编码任务: devstral → qwen3-coder → claude-sonnet |
+| `codex-general` | 通用任务: gemma4 → nemotron → claude-sonnet |
+| `codex-chinese` | 中文任务: qwen3 → sf-qwen2.5-72b → claude-sonnet |
+| `codex-english` | 英文任务: ornith-35b → nemotron → claude-opus |
+| `codex-fast` | 快速任务: deepseek-r1-14b → sf-deepseek-r1 → glm-4-flash |
+
+### 🧠 其他命令
+
+| 命令 | 作用 |
+|------|------|
+| `codex-smart [model]` | 🧠 智能模式: Headroom 压缩 + LiteLLM 路由 |
 | `codex-sticky [model]` | 🔒 粘性会话: 保持同一模型的多轮对话 |
 | `claude-hr` | Claude Code + Headroom 上下文压缩 |
-| `codex-free [model]` | Codex + LiteLLM 免费自动降级 (默认 free-auto) |
-| `codex-ff [model]` | Codex + 手动指定免费云端 (国内/海外) |
-| `codex-local [model]` | Codex + Ollama 本地免费 |
-| `codex-ll` | Codex + LiteLLM 付费强模型 (默认 GPT-5.5) |
+| `codex-free [model]` | 免费自动降级 (兼容旧命令) |
+| `codex-ff [model]` | 手动指定免费云端 (国内/海外) |
+| `codex-local [model]` | 强制本地 Ollama |
+| `codex-ll` | 付费强模型 (默认 GPT-5.5) |
 | `ll-status` | LiteLLM 状态 |
 | `ll-start` | 启动 LiteLLM |
 | `ll-stop` | 停止 LiteLLM |
 | `ll-restart` | 重启 LiteLLM 并加载最新配置 |
 | `ll-logs` | LiteLLM 日志 |
 | `ll-models` | LiteLLM 可用模型列表 |
-| `ll-dashboard` | 打开管理界面（直接打开，部分功能受限） |
-| `ll-dashboard-server [port]` | 启动管理看板 HTTP 服务器（只读，不支持保存配置） |
-| `./start-dashboard-server.sh [port]` | 启动管理看板后端服务器（推荐，支持配置读写） |
+| `ll-dashboard` | 打开管理界面 |
+| `ll-dashboard-server [port]` | 启动管理看板 HTTP 服务器 |
+| `./start-dashboard-server.sh [port]` | 启动管理看板后端服务器（支持配置读写） |
 | `hr-status` | Headroom 状态 |
 | `ol-status` | Ollama 已安装模型 |
 | `ol-models` | Ollama 模型 (API 方式) |
