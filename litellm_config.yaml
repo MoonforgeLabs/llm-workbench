@@ -218,7 +218,7 @@ router_settings:
     - gemini-pro: [gemini-flash, sf-qwen2.5-72b]
   fallbacks:
     # 默认免费入口: 国内免费 → 海外免费 → 本地
-    - free-auto: [sf-deepseek-r1, glm-4-flash, glm-4.7-flash, qwen3-coder-free, nemotron-ultra-free, gpt-oss-120b-free, devstral, ornith-35b]
+    - free-auto: [nemotron-ultra-free, gpt-oss-120b-free, qwen3-coder-free, sf-qwen2.5-72b, glm-4.7-flash, devstral, gemma4, ornith-35b]
     # 付费 → 国内免费 → 海外免费 → 本地
     - gpt-5.5: [claude-sonnet, sf-qwen2.5-72b, qwen3-coder-free, devstral]
     - claude-sonnet: [gpt-5.5, sf-qwen2.5-72b, nemotron-ultra-free, devstral]
