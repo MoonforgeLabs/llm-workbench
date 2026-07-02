@@ -1,7 +1,15 @@
 # LLM Workbench
 
-AI Agent 省钱工具集。借鉴 moonforge 任务分类 + llm-workbench 云端能力。
-策略: **简单任务本地优先，复杂任务云端优先**。
+> **llm-workbench** 是 [LiteLLM](https://github.com/BerriAI/litellm) 的预配置模板，专为中国开发者设计，提供任务分类路由、国内免费源聚合、Shell 工具集等开箱即用功能。
+
+**核心价值**：
+- 🎯 **任务分类路由** — coding/chinese/general/english/fast 自动选择最优模型
+- 🆓 **国内免费源聚合** — SiliconFlow、智谱开箱即用，无需翻墙
+- 🏠 **本地优先策略** — 简单任务本地 Ollama，复杂任务云端付费
+- 💰 **省钱工具集** — 免费模型优先 + Token 压缩 (Headroom)
+- 🛠️ **Shell 工具** — codex-coding、codex-chinese 等快捷命令
+
+**策略**: 简单任务本地优先，复杂任务云端优先。
 
 ## 架构
 
