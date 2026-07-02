@@ -25,9 +25,7 @@ else
   exit 1
 fi
 
-# LITELLM_MASTER_KEY 用于 UI 登录（admin / sk-litellm-local）
-# 无数据库时 UI 可登录但不支持虚拟 key 管理
-:
+# LITELLM_MASTER_KEY 用于 UI 登录（admin / sk-litellm-local）和 API 认证
 
 if [[ "${1:-}" == "--daemon" ]]; then
   if is_running; then
