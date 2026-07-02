@@ -25,11 +25,11 @@ else
   exit 1
 fi
 
-# 本地 Codex 走 /v1/responses；LiteLLM 在没有数据库时如果检测到
-# LITELLM_MASTER_KEY，会启用 DB-backed key auth 并报 `No connected db`。
-# 默认仅监听 127.0.0.1，所以这里显式关闭本地代理 auth。
-if [[ "${LITELLM_ENABLE_AUTH:-0}" != "1" ]]; then
-  unset LITELLM_MASTER_KEY
+# LITELLM_MASTER_KEY 用于 UI 登录和 API 认证。
+# 无数据库时，LiteLLM 仍支持 master key 认证（不依赖 DB）。
+# 如果需要禁用所有认证（纯本地开发），设置 LITELLM_ENABLE_AUTH=0 并 unset。
+if [[ "${LITELLM_ENABLE_AUTH:-0}" == "0" ]]; then
+  : # 保留 master key 供 UI 使用
 fi
 
 if [[ "${1:-}" == "--daemon" ]]; then
