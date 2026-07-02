@@ -53,7 +53,7 @@ codex-free() {
 # ─── 强制本地: Codex + Ollama 本地模型 (离线/兜底) ───
 # 用法: codex-local [模型名]
 codex-local() {
-  local model="${1:-qwen3-coder:30b}"
+  local model="${1:-devstral}"
   local catalog="/Users/alex/Documents/myCode/references/knowledge/litellm-workbench/codex_oss_models.json"
   if ! curl -s --max-time 1 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
     echo "⚠️  Ollama 未运行，先启动: ollama serve"

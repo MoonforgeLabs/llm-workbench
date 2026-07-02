@@ -117,10 +117,45 @@ model_list:
 
   # ═══════════════════════════════════════════
   # 第四层: Ollama 本地免费 (端口 11434)
+  # 按任务分类的首选模型
   # ═══════════════════════════════════════════
+
+  # --- coding: SWE-Bench 46.8% 开源第一，39ms 最快，专为 Agent 编码训练 ---
+  - model_name: devstral
+    litellm_params:
+      model: ollama/devstral:latest
+      api_base: http://127.0.0.1:11434
+
+  # --- general: MMLU Pro 82.6%，LiveCodeBench 77.1%，AIME 88.3%，全能王+视觉+音频 ---
+  - model_name: gemma4
+    litellm_params:
+      model: ollama/gemma4:26b
+      api_base: http://127.0.0.1:11434
+
+  # --- chinese: 中文理解和生成最强，32B dense 模型质量扎实 ---
+  - model_name: qwen3
+    litellm_params:
+      model: ollama/qwen3:32b
+      api_base: http://127.0.0.1:11434
+
+  # --- english: 代码质量最高，类型标注+docstring 风格最规范，英文输出最自然 ---
   - model_name: ornith-35b
     litellm_params:
       model: ollama/ornith:35b
+      api_base: http://127.0.0.1:11434
+
+  # --- fast: 推理链强，14B 小模型速度快 ---
+  - model_name: deepseek-r1-14b
+    litellm_params:
+      model: ollama/deepseek-r1:14b
+      api_base: http://127.0.0.1:11434
+
+  # ═══════════════════════════════════════════
+  # 其他已安装的本地模型 (按大小降序)
+  # ═══════════════════════════════════════════
+  - model_name: deepseek-r1
+    litellm_params:
+      model: ollama/deepseek-r1:32b
       api_base: http://127.0.0.1:11434
 
   - model_name: qwen3-coder
@@ -128,44 +163,14 @@ model_list:
       model: ollama/qwen3-coder:30b
       api_base: http://127.0.0.1:11434
 
-  - model_name: deepseek-r1
-    litellm_params:
-      model: ollama/deepseek-r1:32b
-      api_base: http://127.0.0.1:11434
-
-  - model_name: qwen3
-    litellm_params:
-      model: ollama/qwen3:32b
-      api_base: http://127.0.0.1:11434
-
   - model_name: qwen3.6
     litellm_params:
       model: ollama/qwen3.6:27b
       api_base: http://127.0.0.1:11434
 
-  - model_name: gemma4
-    litellm_params:
-      model: ollama/gemma4:26b
-      api_base: http://127.0.0.1:11434
-
-  - model_name: devstral
-    litellm_params:
-      model: ollama/devstral-small-2:latest
-      api_base: http://127.0.0.1:11434
-
-  - model_name: devstral-large
-    litellm_params:
-      model: ollama/devstral:latest
-      api_base: http://127.0.0.1:11434
-
   - model_name: qwen3-14b
     litellm_params:
       model: ollama/qwen3:14b
-      api_base: http://127.0.0.1:11434
-
-  - model_name: deepseek-r1-14b
-    litellm_params:
-      model: ollama/deepseek-r1:14b
       api_base: http://127.0.0.1:11434
 
   - model_name: qwen2.5-14b
@@ -217,20 +222,20 @@ router_settings:
     - gemini-pro: [gemini-flash, sf-qwen2.5-72b]
   fallbacks:
     # 默认免费入口: 国内免费 → 海外免费 → 本地
-    - free-auto: [sf-deepseek-r1, glm-4-flash, glm-4.7-flash, qwen3-coder-free, nemotron-ultra-free, gpt-oss-120b-free, qwen3-coder, ornith-35b]
+    - free-auto: [sf-deepseek-r1, glm-4-flash, glm-4.7-flash, qwen3-coder-free, nemotron-ultra-free, gpt-oss-120b-free, devstral, ornith-35b]
     # 付费 → 国内免费 → 海外免费 → 本地
-    - gpt-5.5: [claude-sonnet, sf-qwen2.5-72b, qwen3-coder-free, ornith-35b]
-    - claude-sonnet: [gpt-5.5, sf-qwen2.5-72b, nemotron-ultra-free, ornith-35b]
+    - gpt-5.5: [claude-sonnet, sf-qwen2.5-72b, qwen3-coder-free, devstral]
+    - claude-sonnet: [gpt-5.5, sf-qwen2.5-72b, nemotron-ultra-free, devstral]
     # 国内免费互备 → 海外 → 本地
-    - sf-deepseek-r1: [sf-qwen2.5-72b, glm-4-flash, qwen3-coder-free, deepseek-r1]
-    - sf-qwen2.5-72b: [sf-deepseek-r1, glm-4-flash, qwen3-coder-free, qwen3-coder]
-    - glm-4-flash: [glm-4.7-flash, sf-qwen2.5-72b, qwen3-coder-free, qwen3-coder]
-    - glm-4.7-flash: [glm-4-flash, sf-deepseek-r1, qwen3-coder-free, qwen3-coder]
+    - sf-deepseek-r1: [sf-qwen2.5-72b, glm-4-flash, qwen3-coder-free, deepseek-r1-14b]
+    - sf-qwen2.5-72b: [sf-deepseek-r1, glm-4-flash, qwen3-coder-free, qwen3]
+    - glm-4-flash: [glm-4.7-flash, sf-qwen2.5-72b, qwen3-coder-free, qwen3]
+    - glm-4.7-flash: [glm-4-flash, sf-deepseek-r1, qwen3-coder-free, qwen3]
     # 海外免费互备 → 本地
-    - qwen3-coder-free: [nemotron-ultra-free, gpt-oss-120b-free, ornith-35b]
-    - nemotron-ultra-free: [qwen3-coder-free, gpt-oss-120b-free, ornith-35b]
-    - gpt-oss-120b-free: [qwen3-coder-free, nemotron-ultra-free, ornith-35b]
-    - gemma4-free: [qwen3-coder-free, nemotron-ultra-free, ornith-35b]
+    - qwen3-coder-free: [nemotron-ultra-free, gpt-oss-120b-free, devstral]
+    - nemotron-ultra-free: [qwen3-coder-free, gpt-oss-120b-free, devstral]
+    - gpt-oss-120b-free: [qwen3-coder-free, nemotron-ultra-free, devstral]
+    - gemma4-free: [qwen3-coder-free, nemotron-ultra-free, gemma4]
     - llama3.3-70b-free: [qwen3-coder-free, nemotron-ultra-free, ornith-35b]
 
 general_settings:
