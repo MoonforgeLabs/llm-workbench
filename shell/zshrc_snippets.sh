@@ -5,7 +5,7 @@
 # ═══════════════════════════════════════════
 
 # 自动检测项目目录 (支持自定义安装位置)
-LLM_WORKBENCH_DIR="${LLM_WORKBENCH_DIR:-$(cd "$(dirname "${(%):-%x}")" && pwd)}"
+LLM_WORKBENCH_DIR="${LLM_WORKBENCH_DIR:-$(cd "$(dirname "${(%):-%x}")/.." && pwd)}"
 
 _codex_litellm_args() {
   local catalog="${LLM_WORKBENCH_DIR}/codex_litellm_models.json"
