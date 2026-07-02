@@ -25,12 +25,9 @@ else
   exit 1
 fi
 
-# 无数据库模式：必须 unset LITELLM_MASTER_KEY，否则 LiteLLM 报 "No connected db"
-# UI 可用于查看模型和测试，但不支持登录/key 管理。
-# 如需 UI 登录功能，需先配置 database_url 并安装 Prisma。
-if [[ "${LITELLM_ENABLE_AUTH:-0}" != "1" ]]; then
-  unset LITELLM_MASTER_KEY
-fi
+# LITELLM_MASTER_KEY 用于 UI 登录（admin / sk-litellm-local）
+# 无数据库时 UI 可登录但不支持虚拟 key 管理
+:
 
 if [[ "${1:-}" == "--daemon" ]]; then
   if is_running; then
