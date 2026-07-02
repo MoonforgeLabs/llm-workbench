@@ -1,6 +1,7 @@
 # ═══════════════════════════════════════════
 # LiteLLM Workbench — Shell Helper 函数
-# 四层策略: 免费自动→国内免费→海外免费→Ollama, 复杂任务再手动走付费
+# 借鉴 moonforge 任务分类 + llm-workbench 云端能力
+# 策略: 简单任务本地优先，复杂任务云端优先
 # ═══════════════════════════════════════════
 
 _codex_litellm_args() {
@@ -125,6 +126,51 @@ codex-sticky() {
 
   echo "🔒 粘性会话: ${model} (整个会话保持同一模型)"
   codex-free "$model" "$@"
+}
+
+# ─── 任务路由: 借鉴 moonforge task_mapping，按任务自动选择模型 ───
+# 用法: codex-auto [--task coding|general|chinese|english|fast]
+# 策略: 简单任务本地优先，复杂任务云端优先
+codex-auto() {
+  local task="general"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --task) task="$2"; shift 2 ;;
+      *) break ;;
+    esac
+  done
+
+  if ! curl -s --max-time 2 http://127.0.0.1:4000/health/liveliness >/dev/null 2>&1; then
+    echo "⚠️  LiteLLM proxy 未运行，先启动: ll-start"
+    return 1
+  fi
+
+  local model="task-${task}"
+  echo "🎯 任务路由: ${task} → ${model}"
+  local args
+  args=(${(@f)$(_codex_litellm_args)}) || return 1
+  codex "${args[@]}" -m "${model}" "$@"
+}
+
+# ─── 任务快捷命令 ───
+codex-coding() {
+  codex-auto --task coding "$@"
+}
+
+codex-general() {
+  codex-auto --task general "$@"
+}
+
+codex-chinese() {
+  codex-auto --task chinese "$@"
+}
+
+codex-english() {
+  codex-auto --task english "$@"
+}
+
+codex-fast() {
+  codex-auto --task fast "$@"
 }
 
 # ═══════════════════════════════════════════

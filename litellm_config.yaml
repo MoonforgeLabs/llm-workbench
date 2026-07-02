@@ -1,9 +1,52 @@
 # LiteLLM Proxy 配置
-# 四层模型: 付费云端 → 国内免费 → 海外免费(OpenRouter) → 本地Ollama
+# 借鉴 moonforge 的任务分类 + llm-workbench 的云端能力
+# 策略: 简单任务本地优先，复杂任务云端优先
 
 model_list:
   # ═══════════════════════════════════════════
-  # 默认免费入口: 国内免费 → 海外免费 → 本地 Ollama
+  # 任务路由入口 (借鉴 moonforge task_mapping)
+  # codex-auto --task coding  → 自动选择编码最优模型
+  # codex-auto                → 默认 general 任务
+  # ═══════════════════════════════════════════
+
+  # --- coding: 本地 devstral → 海外免费 qwen3-coder → 付费 claude-sonnet ---
+  - model_name: task-coding
+    litellm_params:
+      model: ollama/devstral:latest
+      api_base: http://127.0.0.1:11434
+
+  # --- general: 本地 gemma4 → 海外免费 nemotron → 付费 claude-sonnet ---
+  - model_name: task-general
+    litellm_params:
+      model: ollama/gemma4:26b
+      api_base: http://127.0.0.1:11434
+
+  # --- chinese: 本地 qwen3 → 国内免费 sf-qwen2.5-72b → 付费 claude-sonnet ---
+  - model_name: task-chinese
+    litellm_params:
+      model: ollama/qwen3:32b
+      api_base: http://127.0.0.1:11434
+
+  # --- english: 本地 ornith-35b → 海外免费 nemotron → 付费 claude-opus ---
+  - model_name: task-english
+    litellm_params:
+      model: ollama/ornith:35b
+      api_base: http://127.0.0.1:11434
+
+  # --- fast: 本地 deepseek-r1-14b → 国内免费 sf-deepseek-r1 → 海外免费 ---
+  - model_name: task-fast
+    litellm_params:
+      model: ollama/deepseek-r1:14b
+      api_base: http://127.0.0.1:11434
+
+  # ═══════════════════════════════════════════
+  # 复杂任务入口 (云端优先)
+  # codex-ll                   → 最强编码 gpt-5.5
+  # codex-ll --model claude-opus → 最强推理
+  # ═══════════════════════════════════════════
+
+  # ═══════════════════════════════════════════
+  # 免费自动入口 (兼容旧命令)
   # ═══════════════════════════════════════════
   - model_name: free-auto
     litellm_params:
@@ -217,6 +260,19 @@ router_settings:
     - gpt-5.5: [claude-sonnet, sf-qwen2.5-72b]
     - gemini-pro: [gemini-flash, sf-qwen2.5-72b]
   fallbacks:
+    # ─── 任务路由降级链 (借鉴 moonforge: 本地优先 → 国内免费 → 海外免费 → 付费) ───
+    # coding: devstral → qwen3-coder → sf-qwen2.5-72b → claude-sonnet
+    - task-coding: [qwen3-coder, qwen3-coder-free, sf-qwen2.5-72b, claude-sonnet]
+    # general: gemma4 → gemma4-free → nemotron → claude-sonnet
+    - task-general: [gemma4, gemma4-free, nemotron-ultra-free, claude-sonnet]
+    # chinese: qwen3 → sf-qwen2.5-72b → glm-4.7-flash → claude-sonnet
+    - task-chinese: [qwen3, sf-qwen2.5-72b, glm-4.7-flash, claude-sonnet]
+    # english: ornith-35b → nemotron → gpt-oss-120b → claude-opus
+    - task-english: [ornith-35b, nemotron-ultra-free, gpt-oss-120b-free, claude-opus]
+    # fast: deepseek-r1-14b → sf-deepseek-r1 → glm-4-flash → qwen3-coder-free
+    - task-fast: [deepseek-r1-14b, sf-deepseek-r1, glm-4-flash, qwen3-coder-free]
+
+    # ─── 兼容旧命令 ───
     # 默认免费入口: 国内免费 → 海外免费 → 本地
     - free-auto: [nemotron-ultra-free, gpt-oss-120b-free, qwen3-coder-free, sf-qwen2.5-72b, glm-4.7-flash, devstral, gemma4, ornith-35b]
     # 付费 → 国内免费 → 海外免费 → 本地
