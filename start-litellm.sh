@@ -11,6 +11,10 @@ PORT=4000
 HOST=127.0.0.1
 LOG="${HOME}/.litellm.log"
 
+is_running() {
+  curl -s --max-time 1 "http://${HOST}:${PORT}/health/liveliness" >/dev/null 2>&1
+}
+
 # 加载环境变量
 if [[ -f "$ENV_FILE" ]]; then
   source "$ENV_FILE"
@@ -21,7 +25,19 @@ else
   exit 1
 fi
 
+# 本地 Codex 走 /v1/responses；LiteLLM 在没有数据库时如果检测到
+# LITELLM_MASTER_KEY，会启用 DB-backed key auth 并报 `No connected db`。
+# 默认仅监听 127.0.0.1，所以这里显式关闭本地代理 auth。
+if [[ "${LITELLM_ENABLE_AUTH:-0}" != "1" ]]; then
+  unset LITELLM_MASTER_KEY
+fi
+
 if [[ "${1:-}" == "--daemon" ]]; then
+  if is_running; then
+    echo "✅ LiteLLM proxy 已在 ${HOST}:${PORT} 运行"
+    echo "如需加载最新配置，先执行: ll-restart"
+    exit 0
+  fi
   echo "🚀 Starting LiteLLM proxy on ${HOST}:${PORT} (daemon mode)"
   nohup litellm --config "$CONFIG" --host "$HOST" --port "$PORT" > "$LOG" 2>&1 &
   echo "PID: $!"
@@ -30,6 +46,11 @@ if [[ "${1:-}" == "--daemon" ]]; then
   echo ""
   echo "测试: curl -s http://${HOST}:${PORT}/health | python3 -m json.tool"
 else
+  if is_running; then
+    echo "✅ LiteLLM proxy 已在 ${HOST}:${PORT} 运行"
+    echo "如需加载最新配置，先执行: ll-restart"
+    exit 0
+  fi
   echo "🚀 Starting LiteLLM proxy on ${HOST}:${PORT}"
   litellm --config "$CONFIG" --host "$HOST" --port "$PORT"
 fi

@@ -11,9 +11,20 @@ export PPIO_API_KEY="ppio-via-cc-switch"
 # 注册: https://platform.xiaomimimo.com
 export XIAOMI_MIMO_API_KEY="your-xiaomi-mimo-key"
 
-# OpenRouter (一个 key 调 100+ 模型)
+# OpenRouter (一个 key 调 100+ 模型，含 :free 免费模型)
 # 注册: https://openrouter.ai
 export OPENROUTER_API_KEY="sk-or-your-openrouter-key"
+
+# Google AI Studio — 中国大陆不支持直连，已移除
+# Gemini 模型通过 OpenRouter 中转使用
+
+# SiliconFlow 硅基流动 (国内免费，15 个永久免费模型)
+# 注册: https://cloud.siliconflow.cn → 自动送 14 元余额
+export SILICONFLOW_API_KEY="your-siliconflow-key"
+
+# Zhipu 智谱 (GLM-4-Flash 永久免费)
+# 注册: https://open.bigmodel.cn → 送 20M tokens (永久)
+export ZHIPU_API_KEY="your-zhipu-key"
 
 # LiteLLM 管理密钥 (随意设置)
 export LITELLM_MASTER_KEY="sk-litellm-local"
