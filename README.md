@@ -554,7 +554,13 @@ lsof -i :15721  # CC Switch
 ```
 llm-workbench/
 ├── README.md                    # 本文档
-├── .gitignore                   # 忽略 litellm_env.sh
+├── LICENSE                      # MIT 许可证
+├── CONTRIBUTING.md              # 贡献指南
+├── CHANGELOG.md                 # 版本变更记录
+├── .gitignore                   # 忽略规则
+├── .github/
+│   └── workflows/
+│       └── lint.yml             # CI: ruff lint + format check
 ├── dashboard.html               # 管理界面 (浏览器打开)
 ├── litellm_config.yaml          # LiteLLM 模型路由配置 (34 个模型)
 ├── litellm_env.sh.example       # API key 模板
@@ -566,9 +572,12 @@ llm-workbench/
 ├── scripts/
 │   ├── build-codex-litellm-model-catalog.py  # Codex LiteLLM 模型目录
 │   └── build-codex-oss-model-catalog.py      # Codex OSS 模型目录
-└── launchd/
-    └── ai.litellm.proxy.plist   # macOS 开机自启配置
+├── launchd/
+│   └── ai.litellm.proxy.plist   # macOS 开机自启配置
+└── litellm/                     # LiteLLM 源码 (vendored, 见下方说明)
 ```
+
+> **关于 `litellm/` 目录**: 这是 [LiteLLM](https://github.com/BerriAI/litellm) 的 vendored 副本（Apache-2.0 许可），用于本地开发和自定义修改。它是一个独立的 git 仓库，未作为 submodule 管理。生产部署建议使用 `pip install litellm` 安装官方版本。
 
 ## 换电脑迁移
 
@@ -579,3 +588,9 @@ cp litellm_env.sh.example litellm_env.sh
 vim litellm_env.sh
 ./install.sh --autostart
 ```
+
+## 许可证
+
+本项目采用 [MIT License](LICENSE)。
+
+LiteLLM 部分采用 [Apache-2.0 License](litellm/LICENSE)。

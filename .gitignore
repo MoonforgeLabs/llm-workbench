@@ -18,5 +18,12 @@ logs/
 codex_litellm_models.json
 codex_oss_models.json
 
+# Temp files
+.!*
+
 # macOS
 .DS_Store
+
+# IDE / Editor
+.vscode/
+.idea/
