@@ -25,7 +25,8 @@ else
   exit 1
 fi
 
-# LITELLM_MASTER_KEY 用于 UI 登录（admin / sk-litellm-local）和 API 认证
+# 无数据库模式 — 必须 unset LITELLM_MASTER_KEY，否则报 "No connected db"
+unset LITELLM_MASTER_KEY
 
 if [[ "${1:-}" == "--daemon" ]]; then
   if is_running; then
