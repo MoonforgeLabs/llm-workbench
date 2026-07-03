@@ -97,7 +97,9 @@ codex-ll --model claude-opus
 | `codex-auto --task english` | 英文 | ornith-35b | nemotron → claude-opus | 免费 |
 | `codex-auto --task fast` | 快速 | deepseek-r1-14b | sf-deepseek-r1 → glm-4-flash | 免费 |
 | `codex-coding` | 编码快捷命令 | devstral | 同上 | 免费 |
+| `codex-general` | 通用快捷命令 | gemma4 | 同上 | 免费 |
 | `codex-chinese` | 中文快捷命令 | qwen3 | 同上 | 免费 |
+| `codex-english` | 英文快捷命令 | ornith-35b | 同上 | 免费 |
 | `codex-fast` | 快速快捷命令 | deepseek-r1-14b | 同上 | 免费 |
 
 ### 🧠 其他命令
@@ -109,12 +111,50 @@ codex-ll --model claude-opus
 | `codex-ll` | 付费强模型任务 | 第一层 (默认 GPT-5.5) | 中等 |
 | `codex-ll --model claude-opus` | 最强推理 | 第一层 (Claude Opus) | 最高 |
 | `codex-free` | 免费自动降级 | 海外免费 → 国内免费 → 本地 | 免费 |
+| `codex-ff` | 指定免费云端模型 | 国内免费 / OpenRouter :free | 免费 |
 | `codex-local` | 强制本地、离线兜底 | 第四层 (Ollama) | 免费 |
 | `codex-sticky` | 🔒 粘性会话 (保持同一模型) | 指定模型 | 按模型 |
 
 > `codex-local` 会自动给 Codex 传入 `codex_oss_models.json`，为常用 Ollama 模型补齐 metadata。
 > 如果升级 Codex 后再次出现 `Model metadata ... not found`，运行:
 > `python3 references/knowledge/llm-workbench/scripts/build-codex-oss-model-catalog.py`。
+
+### ⚙️ LiteLLM 管理
+
+| 命令 | 说明 |
+|------|------|
+| `ll-start` | 启动 LiteLLM (后台 daemon) |
+| `ll-stop` | 停止 LiteLLM |
+| `ll-restart` | 重启 LiteLLM |
+| `ll-status` | 检查 LiteLLM 是否运行中 |
+| `ll-models` | 列出所有可用模型 |
+| `ll-logs` | 查看最近 50 行日志 |
+| `ll-dashboard` | 打开本地 Dashboard (浏览器) |
+
+### 🔍 状态检查
+
+| 命令 | 说明 |
+|------|------|
+| `hr-status` | 检查 Headroom 压缩代理状态 |
+| `ol-status` | 列出 Ollama 本地模型 |
+| `ol-models` | 同上 (API 方式) |
+
+### 免费模型速查
+
+```bash
+# 国内免费 (无需翻墙)
+codex-ff sf-deepseek-r1 "问题"    # DeepSeek R1
+codex-ff sf-qwen2.5-72b "问题"   # Qwen2.5 72B
+codex-ff glm-4-flash "问题"       # 智谱 GLM-4
+codex-ff glm-4.7-flash "问题"     # 智谱 GLM-4.7
+
+# 海外免费 (OpenRouter :free)
+codex-ff qwen3-coder-free "问题"  # Qwen3 Coder (默认)
+codex-ff nemotron-ultra-free "问题"  # Nemotron Ultra
+codex-ff gpt-oss-120b-free "问题" # GPT-OSS 120B
+codex-ff gemma4-free "问题"       # Gemma4
+codex-ff llama3.3-70b-free "问题" # Llama 3.3 70B
+```
 
 ## 完整模型清单 (33 个)
 
