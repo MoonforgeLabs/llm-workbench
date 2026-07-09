@@ -1,5 +1,57 @@
 # LiteLLM Workbench 改造日志
 
+## 2026-07-09 - 修复 codex-hr-pro 断连问题
+
+### 🐛 问题
+
+`codex-hr-pro` 启动正常，但执行交互时报错：
+
+```
+⚠ Falling back from WebSockets to HTTPS transport.
+stream disconnected before completion: websocket closed by server before response.completed
+```
+
+### 🔍 根因
+
+**两层问题叠加**：
+
+**问题 1：supports_websockets 硬编码为 true**
+
+Headroom 在 3 个文件中硬编码了 `supports_websockets = true`，导致 Codex 尝试 WebSocket 传输，但上游不支持。
+
+**问题 2：headroom proxy 缺少 OpenAI 上游配置**
+
+headroom proxy 启动时只配了 `--anthropic-api-url`，没配 `--openai-api-url`。Codex 使用 OpenAI Responses API（`/v1/responses`），proxy 不知道往哪转发，返回 server_error。
+
+`claude-hr-pro` 不受影响，因为 Claude Code 使用 Anthropic API（`/v1/messages`），与 headroom proxy 的 Anthropic 后端完全匹配。
+
+### ✅ 修复
+
+**1. supports_websockets 改为 false**（3 处源码 + 3 处已安装包）
+
+**2. headroom proxy 加上 OpenAI 上游**
+
+`~/.headroom/run-headroom-mify.sh` 中加上 `--openai-api-url http://127.0.0.1:15721`（cc-switch），重启 proxy。
+
+**3. codex-hr-pro 保持用 `headroom wrap codex`**（无需绕过）
+
+### ⚠️ Headroom 升级流程
+
+**手动升级**：
+
+```bash
+pipx upgrade headroom-ai
+./projects/ai-agent-env/patches/001-headroom-websocket.sh
+```
+
+**自动补偿**：`clone_repos.sh update/sync` 会自动执行 `patches/` 下所有脚本，无需手动操作。
+
+- `~/.headroom/run-headroom-mify.sh` 不在 pipx venv 里，不受 upgrade 影响
+- 修复脚本：`alex-local-configs/projects/ai-agent-env/patches/001-headroom-websocket.sh`
+- headroom proxy 重启后需验证 `/v1/responses` 端点可用
+
+---
+
 ## 2026-07-02 - 吸收 OmniRoute/FreeLLMAPI 优点 + 管理界面
 
 ### 🎯 改造目标

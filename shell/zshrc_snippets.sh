@@ -28,6 +28,27 @@ claude-hr() {
   ANTHROPIC_BASE_URL="http://127.0.0.1:8787" claude "$@"
 }
 
+# ─── Codex + Headroom (上下文压缩，同 claude-hr 套路) ───
+# 用法: codex-hr
+codex-hr() {
+  headroom install start --profile init-user >/dev/null 2>&1
+  OPENAI_BASE_URL="http://127.0.0.1:8787" codex "$@"
+}
+
+# ─── Claude Code + Headroom Pro (wrap 模式: 压缩 + context tool + MCP) ───
+# 用法: claude-hr-pro
+claude-hr-pro() {
+  headroom wrap claude -- "$@"
+}
+
+# ─── Codex + Headroom Pro (wrap 模式: 压缩 + context tool + MCP) ───
+# 用法: codex-hr-pro
+# 注意: headroom proxy 需要同时配置 --anthropic-api-url 和 --openai-api-url，
+#       否则 Codex 的 /v1/responses 请求会失败。见 run-headroom-mify.sh。
+codex-hr-pro() {
+  headroom wrap codex -- "$@"
+}
+
 # ─── 付费强模型: Codex + LiteLLM (默认 GPT-5.5) ───
 # 用法: codex-ll
 codex-ll() {
@@ -108,7 +129,7 @@ codex-smart() {
   fi
   echo "🧠 智能模式: Headroom 压缩 + LiteLLM 路由 + ${model}"
   # 通过 Headroom → LiteLLM 链路
-  ANTHROPIC_BASE_URL="http://127.0.0.1:8787" \
+  OPENAI_BASE_URL="http://127.0.0.1:8787" \
     codex -m "${model}" "$@"
 }
 
