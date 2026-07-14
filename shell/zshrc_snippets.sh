@@ -7,6 +7,9 @@
 # 自动检测项目目录 (支持自定义安装位置)
 LLM_WORKBENCH_DIR="${LLM_WORKBENCH_DIR:-$(cd "$(dirname "${(%):-%x}")/.." && pwd)}"
 
+# Headroom OpenAI 转发目标 (Codex 的实际 API 后端)
+export OPENAI_TARGET_API_URL="https://api.llm.mioffice.cn/v1"
+
 _codex_litellm_args() {
   local catalog="${LLM_WORKBENCH_DIR}/codex_litellm_models.json"
   if [[ ! -f "${catalog}" ]]; then
@@ -32,6 +35,7 @@ claude-hr() {
 # 用法: codex-hr
 codex-hr() {
   headroom install start --profile init-user >/dev/null 2>&1
+  export OPENAI_API_KEY="${OPENAI_API_KEY:-$(python3 -c 'import json; print(json.load(open("'$HOME/.codex/auth.json'")).get("OPENAI_API_KEY",""))' 2>/dev/null)}"
   OPENAI_BASE_URL="http://127.0.0.1:8787" codex "$@"
 }
 
@@ -43,10 +47,22 @@ claude-hr-pro() {
 
 # ─── Codex + Headroom Pro (wrap 模式: 压缩 + context tool + MCP) ───
 # 用法: codex-hr-pro
-# 注意: headroom proxy 需要同时配置 --anthropic-api-url 和 --openai-api-url，
-#       否则 Codex 的 /v1/responses 请求会失败。见 run-headroom-mify.sh。
+# 注意: headroom wrap codex 会篡改 config.toml，退出后自动还原。
 codex-hr-pro() {
+  local cfg="$HOME/.codex/config.toml"
+  local auth="$HOME/.codex/auth.json"
+  local cfg_bak="$HOME/.codex/config.toml.pre-hr-pro"
+  local auth_bak="$HOME/.codex/auth.json.pre-hr-pro"
+  cp "$cfg" "$cfg_bak"
+  cp "$auth" "$auth_bak"
+  # 确保 Codex 带 auth header (headroom wrap 注入的 provider 可能缺 requires_openai_auth)
+  export OPENAI_API_KEY="$(python3 -c 'import json; print(json.load(open("'"$auth"'")).get("OPENAI_API_KEY",""))' 2>/dev/null)"
   headroom wrap codex -- "$@"
+  local rc=$?
+  cp "$cfg_bak" "$cfg"
+  cp "$auth_bak" "$auth"
+  rm -f "$cfg_bak" "$auth_bak"
+  return $rc
 }
 
 # ─── 付费强模型: Codex + LiteLLM (默认 GPT-5.5) ───

@@ -1,52 +1,56 @@
 #!/usr/bin/env bash
-# 启动 LiteLLM Proxy
-# 用法: start-litellm.sh [--daemon]
+# LiteLLM 启动脚本 - 支持付费模型开关
+# 用法:
+#   ./start-litellm.sh              # 默认关闭付费模型
+#   ./start-litellm.sh --paid       # 启用付费模型
+#   LITELLM_ENABLE_PAID_MODELS=true ./start-litellm.sh  # 环境变量方式
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONFIG="${SCRIPT_DIR}/litellm_config.yaml"
-ENV_FILE="${SCRIPT_DIR}/litellm_env.sh"
-PORT=4000
-HOST=127.0.0.1
-LOG="${HOME}/.litellm.log"
-
-is_running() {
-  curl -s --max-time 1 "http://${HOST}:${PORT}/health/liveliness" >/dev/null 2>&1
-}
-
 # 加载环境变量
-if [[ -f "$ENV_FILE" ]]; then
-  source "$ENV_FILE"
+source "$(dirname "$0")/litellm_env.sh"
+
+# 解析参数
+ENABLE_PAID="${LITELLM_ENABLE_PAID_MODELS:-false}"
+for arg in "$@"; do
+  case $arg in
+    --paid|--enable-paid)
+      ENABLE_PAID="true"
+      ;;
+    --free|--disable-paid)
+      ENABLE_PAID="false"
+      ;;
+  esac
+done
+
+CONFIG_FILE="$(dirname "$0")/litellm_config.yaml"
+TMP_CONFIG="/tmp/litellm_config_$$.yaml"
+
+# 替换占位符
+if [[ "$ENABLE_PAID" == "true" ]]; then
+  echo "💰 启用付费模型"
+  PAID_CLAUDE_SONNET="claude-sonnet"
+  PAID_CLAUDE_OPUS="claude-opus"
+  PAID_GPT_5_5="gpt-5.5"
 else
-  echo "❌ 未找到 litellm_env.sh，先创建:"
-  echo "   cp litellm_env.sh.example litellm_env.sh"
-  echo "   vim litellm_env.sh  # 填入你的 API key"
-  exit 1
+  echo "🔒 禁用付费模型 (默认免费模式)"
+  PAID_CLAUDE_SONNET=""   # 空字符串会让 LiteLLM 跳过该降级
+  PAID_CLAUDE_OPUS=""
+  PAID_GPT_5_5=""
 fi
 
-# 无数据库模式 — 必须 unset LITELLM_MASTER_KEY，否则报 "No connected db"
-unset LITELLM_MASTER_KEY
+# 生成运行时配置
+sed -e "s/\${PAID_CLAUDE_SONNET}/${PAID_CLAUDE_SONNET}/g" \
+    -e "s/\${PAID_CLAUDE_OPUS}/${PAID_CLAUDE_OPUS}/g" \
+    -e "s/\${PAID_GPT_5_5}/${PAID_GPT_5_5}/g" \
+    -e "s/\${SILICONFLOW_API_KEY}/${SILICONFLOW_API_KEY}/g" \
+    -e "s/\${ZHIPU_API_KEY}/${ZHIPU_API_KEY}/g" \
+    -e "s/\${OPENROUTER_API_KEY}/${OPENROUTER_API_KEY}/g" \
+    "$CONFIG_FILE" > "$TMP_CONFIG"
 
-if [[ "${1:-}" == "--daemon" ]]; then
-  if is_running; then
-    echo "✅ LiteLLM proxy 已在 ${HOST}:${PORT} 运行"
-    echo "如需加载最新配置，先执行: ll-restart"
-    exit 0
-  fi
-  echo "🚀 Starting LiteLLM proxy on ${HOST}:${PORT} (daemon mode)"
-  nohup litellm --config "$CONFIG" --host "$HOST" --port "$PORT" > "$LOG" 2>&1 &
-  echo "PID: $!"
-  echo "Log: ${LOG}"
-  echo "URL: http://${HOST}:${PORT}"
-  echo ""
-  echo "测试: curl -s http://${HOST}:${PORT}/health | python3 -m json.tool"
-else
-  if is_running; then
-    echo "✅ LiteLLM proxy 已在 ${HOST}:${PORT} 运行"
-    echo "如需加载最新配置，先执行: ll-restart"
-    exit 0
-  fi
-  echo "🚀 Starting LiteLLM proxy on ${HOST}:${PORT}"
-  litellm --config "$CONFIG" --host "$HOST" --port "$PORT"
-fi
+# 启动 LiteLLM
+echo "🚀 启动 LiteLLM (端口 4000)..."
+litellm --config "$TMP_CONFIG"
+
+# 清理
+trap 'rm -f "$TMP_CONFIG"' EXIT
